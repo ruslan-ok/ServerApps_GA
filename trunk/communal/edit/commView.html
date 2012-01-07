@@ -1,0 +1,258 @@
+{% extends "../../base.html" %}
+{% block content %}
+
+  <script language="javascript" type="text/javascript">
+
+    /*               1          2        3        4        5      6       7        8          9 */
+    var months = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
+
+    function getLink(_y, _m)
+    {
+      var html = '<a href="/communal?year=' + _y +'&month=' + _m + '">' + _y + ' ' + months[_m-1] + '</a>';
+      document.write(html);
+      return true;
+    }
+
+    function myClick(_num)
+    {
+      var frm = document.getElementById('fld_form');
+      var act = frm.elements['action'];
+      switch (_num) {
+        case 1:  act.value = 'update'; break;
+        case 2:  act.value = 'delete'; break;
+        case 3:  act.value = 'cancel'; break;
+      }
+      frm.Submit();
+      return true;
+    }
+
+    function get_el(_name)
+    {
+      var ret = parseInt(document.getElementById('fld_form').elements[_name].value);
+      if (isNaN(ret))
+        return 0;
+
+      return ret;
+    }
+
+    bFirst = true; // Самая старая запись
+    bLast  = true; // Самая новая запись
+
+    function count_vol(_new, _old)
+    {
+      var i_vol = 0;
+      i_new = parseInt(document.getElementById('fld_form').elements[_new].value);
+      i_old = parseInt(document.getElementById('fld_form').elements[_old].value);
+
+      if (!isNaN(i_new) && !isNaN(i_old))
+        i_vol = (i_new - i_old);
+
+      return i_vol;
+    }
+
+    function count_sum(_vol, _tar)
+    {
+      var f_tar = parseFloat(document.getElementById('fld_form').elements[_tar].value);
+      var i_sum = 0;
+      if (!isNaN(_vol) && !isNaN(f_tar))
+        i_sum = _vol * f_tar;
+
+      return Math.round(i_sum);
+    }
+    
+    function check()
+    {
+      var ele_vol = count_vol('el_new',   'el_old');
+      var gas_vol = count_vol('gas_new',  'gas_old');
+      var wat_vol = count_vol('cold_new', 'cold_old') + count_vol('hot_new', 'hot_old');
+
+      document.getElementById('ele_vol').innerHTML = ele_vol;
+      document.getElementById('gas_vol').innerHTML = gas_vol;
+      document.getElementById('wat_vol').innerHTML = wat_vol;
+
+      ele_sum = count_sum(ele_vol, 'el_tar');
+      gas_sum = count_sum(gas_vol, 'gas_tar');
+      wat_sum = count_sum(wat_vol, 'water_tar');
+
+      document.getElementById('ele_sum').innerHTML = ele_sum;
+      document.getElementById('gas_sum').innerHTML = gas_sum;
+      document.getElementById('wat_sum').innerHTML = wat_sum;
+
+      var zhir_pay = get_el('hot_pay') + get_el('repair_pay') + get_el('ZKX_pay');
+      document.getElementById('zhir_pay').innerHTML = zhir_pay;
+
+
+      document.getElementById('tv_debt').innerHTML    = get_el('tv_tar')    - get_el('tv_pay');
+      document.getElementById('phone_debt').innerHTML = get_el('phone_tar') - get_el('phone_pay');
+      document.getElementById('zhir_debt').innerHTML  = get_el('zhirovka')  - zhir_pay;
+      document.getElementById('ele_debt').innerHTML   = ele_sum             - get_el('el_pay');
+      document.getElementById('gas_debt').innerHTML   = gas_sum             - get_el('gas_pay');
+      document.getElementById('wat_debt').innerHTML   = wat_sum             - get_el('water_pay');
+
+      var total_bill = ele_sum + gas_sum + wat_sum + get_el('tv_tar') + get_el('phone_tar') + get_el('zhirovka');
+      document.getElementById('total_bill').innerHTML = total_bill;
+
+      var total_pay = get_el('tv_pay') + get_el('phone_pay') + get_el('hot_pay') + get_el('repair_pay') + 
+                      get_el('ZKX_pay') + get_el('el_pay') + get_el('gas_pay') + get_el('water_pay');
+      document.getElementById('total_pay').innerHTML = total_pay;
+      
+      document.getElementById('debt').innerHTML = total_bill - total_pay;
+      var course = get_el('course');
+      var total_usd = 0;
+      if (course != 0)
+        total_usd = total_bill / course;
+      document.getElementById('total_usd').innerHTML = Math.round(total_usd, 2);
+    }
+
+    function FieldNum(_name, _value)
+    {
+      var html = '';
+
+      if (bLast && ((_name.indexOf('_old') < 0) || bFirst))
+        html += '<td class="fl2"> <input name="' + _name + '" type="number" value="' + _value + '" onChange="check()" /> </td>';
+      else
+        html += '<td class="fl3"> <input name="' + _name + '" type="hidden" value="' + _value + '" />' + _value + ' </td>';
+      
+      document.write(html);
+    }
+
+    function FieldTar(_name, _value)
+    {
+      var html = '';
+
+      if (bLast)
+        html += '<td class="fl2"> <input name="' + _name + '" type="text" value="' + parseFloat(_value) + '" onChange="check()" /> </td>';
+      else
+        html += '<td class="fl3"> <input name="' + _name + '" type="hidden" value="' + parseFloat(_value) + '" />' + parseFloat(_value) + ' </td>';
+      
+      document.write(html);
+    }
+
+    function FieldDate(_name, _value)
+    {
+      var html = '';
+
+      if (bLast)
+        html += '<td class="fl2"> <input name="' + _name + '" type="text" value="' + _value + '" onChange="check()" /> </td>';
+      else
+        html += '<td class="fl3"> <input name="' + _name + '" type="hidden" value="' + _value + '" />' + _value + ' </td>';
+      
+      document.write(html);
+    }
+
+  </script>
+
+  <div id="gmenu" class="menu"> <a href="/"> {{ app_text }} </a> </div>
+  <div class="PageTitle">   {{ page_title }}     </div>
+
+  <form id="fld_form" action="/communal/edit" method="post">
+    <input name="action" type="hidden" value="none">
+    <input name="year"   type="hidden" value="{{cur.year}}">
+    <input name="month"  type="hidden" value="{{cur.month}}">
+    <table class="fl1"><tbody>
+      <tr><td class="fl3"> Период </td>
+          <td class="fl3"> <script language="javascript" type="text/javascript">
+                           document.write(months[{{cur.month}}-1] + ' ' + {{cur.year}} + ' г.');</script> </td>
+          <td></td> <td></td> <td></td>
+      </tr>
+      <tr> <td></td> <td class="fl3"> Новое </td> <td class="fl3"> Старое </td> <td class="fl3"> Объем </td> <td class="fl3"> Тариф </td> </tr>
+      <tr><td class="fl1"> Электро </td>
+          <td class="fl3"> {{ cur.el_new }} </td>
+          <td class="fl3"> {{ cur.el_old }} </td>
+          <td class="fl3" id="ele_vol"> </td>
+          <script language="javascript" type="text/javascript">parseFloat({{cur.el_tar}});</script>
+      </tr>
+      <tr><td class="fl1"> Газ </td>
+          <td class="fl3"> {{ cur.gas_new }} </td>
+          <td class="fl3"> {{ cur.gas_old }} </td>
+          <td class="fl3" id="gas_vol"> </td>
+          <script language="javascript" type="text/javascript">parseFloat({{cur.gas_tar}});</script>
+      </tr>
+      <tr><td class="fl1"> Холодная </td>
+          <td class="fl3"> {{ cur.cold_new }} </td>
+          <td class="fl3"> {{ cur.cold_new }} </td>
+          <td class="fl3" id="wat_vol"> </td>
+          <script language="javascript" type="text/javascript">parseFloat({{cur.water_tar}});</script>
+      </tr>
+      <tr><td class="fl1"> Горячая </td>
+          <td class="fl3"> {{ cur.hot_new }} </td>
+          <td class="fl3"> {{ cur.hot_new }} </td>
+          <td></td>  <td></td>
+      </tr>
+      <tr> <td></td> <td></td> <td></td> <td></td> <td></td> </tr>
+      <tr> <td></td> <td class="fl3"> Начислено </td> <td class="fl3"> Оплата </td> <td class="fl3"> Долг </td> <td></td> </tr>
+      <tr><td class="fl1"> Пок.,Опл. </td>
+          <td class="fl3"> {{ cur.s_dCounter }} </td>
+          <td class="fl3"> {{ cur.s_dPay }} </td>
+          <td></td>  <td></td>
+      </tr>
+      <tr><td class="fl1"> Антена </td>
+          <td class="fl3"> {{ cur.tv_tar }} </td>
+          <td class="fl3"> {{ cur.tv_pay }} </td>
+          <td class="fl3" id="tv_debt"> </td> <td></td>
+      </tr>
+      <tr><td class="fl1"> Телефон </td>
+          <script language="javascript" type="text/javascript">FieldNum('phone_tar', {{ cur.phone_tar }});</script>
+          <script language="javascript" type="text/javascript">FieldNum('phone_pay', {{ cur.phone_pay }});</script>
+          <td class="fl3" id="phone_debt"> </td> <td></td>
+      </tr>
+      <tr><td class="fl1"> Жировка </td>
+          <script language="javascript" type="text/javascript">FieldNum('zhirovka', {{ cur.zhirovka }});</script>
+          <td class="fl3" id="zhir_pay"> </td>
+          <td class="fl3" id="zhir_debt"> </td> <td></td>
+      </tr>
+      <tr><td class="fl1"> Тепло </td>
+          <td></td>
+          <script language="javascript" type="text/javascript">FieldNum('hot_pay', {{ cur.hot_pay }});</script>
+          <td></td>  <td></td>
+      </tr>
+      <tr><td class="fl1"> Капремонт </td>
+          <td></td>
+          <script language="javascript" type="text/javascript">FieldNum('repair_pay', {{ cur.repair_pay }});</script>
+          <td></td>  <td></td>
+      </tr>
+      <tr><td class="fl1"> ЖКХ </td>
+          <td></td>
+          <script language="javascript" type="text/javascript">FieldNum('ZKX_pay', {{ cur.ZKX_pay }});</script>
+          <td></td>  <td></td>
+      </tr>
+      <tr><td class="fl1"> Электро </td>
+          <td class="fl3" id="ele_sum"> </td>
+          <script language="javascript" type="text/javascript">FieldNum('el_pay', {{ cur.el_pay }});</script>
+          <td class="fl3" id="ele_debt"> </td><td></td>
+      </tr>
+      <tr><td class="fl1"> Газ </td>
+          <td class="fl3" id="gas_sum"> </td>
+          <script language="javascript" type="text/javascript">FieldNum('gas_pay', {{ cur.gas_pay }});</script>
+          <td class="fl3" id="gas_debt"> </td><td></td>
+      </tr>
+      <tr><td class="fl1"> Вода </td>
+          <td class="fl3" id="wat_sum"> </td>
+          <script language="javascript" type="text/javascript">FieldNum('water_pay', {{ cur.water_pay }});</script>
+          <td class="fl3" id="wat_debt"> </td><td></td>
+      </tr>
+      <tr><td class="fl1"> Итого </td>
+          <td class="fl3" id="total_bill"> </td>
+          <td class="fl3" id="total_pay"> </td>
+          <td class="fl3" id="debt"> </td>
+          <td></td>
+      </tr>
+      <tr><td class="fl1"> Курс </td>
+          <script language="javascript" type="text/javascript">FieldNum('course', {{ cur.course }});</script>
+          <td class="fl3" id="total_usd"> </td>
+          <td></td>  <td></td>
+      </tr>
+    </tbody></table>
+      {% if uttermost %}
+      <input type="submit" class="LiteButton" id="update" value="Сохранить" onClick="myClick(1)" >
+      <input type="submit" class="LiteButton" id="delete" value="Удалить"   onClick="myClick(2)" >
+      <input type="submit" class="LiteButton" id="common" value="Отменить"  onClick="myClick(3)" >
+      {% else %}
+      <input type="submit" class="LiteButton" id="common" value="Назад"  onClick="myClick(3)" >
+      {% endif %}
+    <script language="javascript" type="text/javascript"> check() </script>
+  </form>
+
+{% endblock %}
+
+

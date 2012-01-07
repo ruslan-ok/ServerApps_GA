@@ -1,0 +1,17 @@
+{% extends "../base.html" %}
+{% block content %}
+
+  <div id="gmenu" class="menu"> <a href="/"> {{ app_text }} </a> </div>
+  
+  <div class="PageTitle">  {{ page_title}}   </div>
+  <div class="PageStatus"> {{ other_status}} </div>
+
+  <form id="fld_form" action="/other" enctype="multipart/form-data" method="post">
+    <input name="action" type="hidden" value="none">
+    <input name="file"   type="file"   value="none" size="20">
+    <p> Type some text (if you like):<br>             <input type="text" name="textline" size="30"></p>
+    <p> Please specify a file, or a set of files:<br> <input type="file" name="datafile" size="40"></p>
+    <div><input type="submit" value="Send"></div>
+  </form>
+
+{% endblock %}
