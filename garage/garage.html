@@ -1,0 +1,184 @@
+{% extends "../base.html" %}
+{% block content %}
+
+  <script language="javascript" type="text/javascript">
+
+    operDate = new Date();
+    
+    function parseDate()
+    {
+      var sd = document.getElementById('dat').value;
+      var parts = sd.split('.');
+      if (parts.length == 3)
+        if (!isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2]))
+        {
+          var day   = parseInt(parts[0]);
+          var month = parseInt(parts[1])-1;
+          var year  = parseInt(parts[2]);
+          operDate  = new Date(year, month, day);
+
+          if ((day == operDate.getDate()) && (month == operDate.getMonth()) && (year == operDate.getFullYear()))
+            return '';
+        }
+      return 'Не задана дата';
+    }
+    
+    totalSum = 0;
+    
+    function parseSumm()
+    {
+      var kol = parseFloat(document.getElementById('kol').value);
+      var prc = parseInt(document.getElementById('prc').value);
+      var crs = parseInt(document.getElementById('crs').value);
+      var usd = parseInt(document.getElementById('usd').value);
+      
+      var totalSum = 0;
+      if (!isNaN(crs) && !isNaN(kol) && !isNaN(prc) && (crs != 0) && (kol != 0) && (prc != 0))
+        totalSum = (kol * prc) / crs;
+      if (!isNaN(usd))
+        totalSum += usd;
+    
+      document.getElementById('total').innerHTML = totalSum.toFixed(2);
+
+      if (totalSum == 0)
+        return 'Не задана сумма';
+      else
+        return '';
+    }
+
+    function parseText()
+    {
+      if (document.getElementById('knt').value == '')
+        return 'Не указан контрагент';
+
+      if (document.getElementById('txt').value == '')
+        return 'Не внесено описание';
+
+      return '';
+    }
+
+    bEdit = false;
+    
+    function check()
+    {
+      var dateError = parseDate();
+      var summError = parseSumm();
+      var textError = parseText();
+      var status = '';
+      if (dateError != '')
+        status = dateError;
+      else
+        if (summError != '')
+          status = summError;
+        else
+          if (textError != '')
+            status = textError;
+      
+      document.getElementById('status').innerHTML = status;
+
+      var x = document.getElementById('button');
+      if (status != '')
+      {
+        if (!bEdit)
+          x.innerHTML = '';
+        else
+          x.innerHTML = '<input type="submit" class="LiteButton" id="delete" value="Удалить"   onClick="myClick(3)" />' +
+                        '<input type="submit" class="LiteButton" id="common" value="Отменить"  onClick="myClick(4)" />';
+      }
+      else
+      {
+        if (!bEdit)
+          x.innerHTML = '<input type="submit" class="LiteButton" id="update" value="Добавить"  onClick="myClick(1)" />';
+        else
+          x.innerHTML = '<input type="submit" class="LiteButton" id="update" value="Сохранить" onClick="myClick(2)" />' +
+                        '<input type="submit" class="LiteButton" id="delete" value="Удалить"   onClick="myClick(3)" />' +
+                        '<input type="submit" class="LiteButton" id="common" value="Отменить"  onClick="myClick(4)" />';
+      }
+    }
+
+    function myClick(_num)
+    {
+      var frm = document.getElementById('fld_form');
+      var act = frm.elements['action'];
+      switch (_num) {
+        case 1:  act.value = 'insert'; break;
+        case 2:  act.value = 'update'; break;
+        case 3:  act.value = 'delete'; break;
+        case 4:  act.value = 'cancel'; break;
+        case 5:  act.value = 'import'; break;
+        default: act.value = 'undef'; 
+      }
+      frm.Submit();
+      return true;
+    }
+
+    function getLink(_p)
+    {
+      var html = '<a href="/garage?pid=' + _p +'">' + _p + '</a>';
+      document.write(html);
+      return true;
+    }
+
+  </script>
+
+  <div id="gmenu" class="menu"> <a href="/"> {{ app_text }} </a>  </div>
+  <div class="PageTitle">   {{ page_title }}     </div>
+  <div>                     {{ garage_summary }} </div>
+
+  <form id="fld_form" action="/garage" method="post">
+    <input name="pid"    type="hidden" value="{{ cur.pid }}">
+    <input name="action" type="hidden" value="none">
+    <table class="fl1"><tbody>
+      {% if edit_rec %} 
+      <script language="javascript" type="text/javascript"> bEdit = true; </script>
+      <tr><td class="fl1"> ID:               </td><td class="fl2"> {{ cur.pid }} </td> </tr>
+      {% else %}
+      <script language="javascript" type="text/javascript"> bEdit = false; </script>
+      {% endif %} 
+      <tr><td class="fl1"> Дата:          </td><td class="fl2"> <input id="dat" name="date"   type="text"   onChange="check()" value="{{ cur.s_date }}" /> </td> </tr>
+      <tr><td class="fl1"> Количество:    </td><td class="fl2"> <input id="kol" name="kol"    type="text"   onChange="check()" value="{{ cur.kol }}"    /> </td> </tr>
+      <tr><td class="fl1"> Цена в рублях: </td><td class="fl2"> <input id="prc" name="price"  type="number" onChange="check()" value="{{ cur.price }}"  /> </td> </tr>
+      <tr><td class="fl1"> Курс доллара:  </td><td class="fl2"> <input id="crs" name="course" type="number" onChange="check()" value="{{ cur.course }}" /> </td> </tr>
+      <tr><td class="fl1"> Сумма в USD:   </td><td class="fl2"> <input id="usd" name="usd"    type="number" onChange="check()" value="{{ cur.usd }}"    /> </td> </tr>
+      <tr><td class="fl1"> Итого в USD:   </td><td class="fl2"> <div id="total"> </div> </td> </tr>
+      <tr><td class="fl1"> Контрагент:    </td><td class="fl2"> <input id="knt" name="kontr"  type="text"   onChange="check()" value="{{ cur.kontr }}"  /> </td> </tr>
+      <tr><td class="fl1"> Описание:      </td><td class="fl2"> <input id="txt" name="text"   type="text"   onChange="check()" value="{{ cur.text }}"   /> </td> </tr>
+    </tbody></table>
+
+    <p id="status" class="PageStatus"> </p> 
+    <p id="button"> </p> 
+    <script language="javascript" type="text/javascript"> check() </script>
+  </form>
+
+  {% if opers.count %}
+  <table class="work">
+    <tbody><tr>
+      <th class="work"> ID    </th>
+      <th class="work"> Дата  </td>
+      <th class="work"> К-во  </td>
+      <th class="work"> Цена  </td>
+      <th class="work"> Курс  </td>
+      <th class="work"> USD   </td>
+      <th class="work"> Итого </td>
+      <th class="work"> Контрагент </td>
+      <th class="work"> Описание   </td>
+    </tr>
+    {% for g in opers %}
+    <tr>
+      <td class="pid">  <script language="javascript" type="text/javascript">getLink({{ g.pid }})</script> </td>
+      <td class="work"> {{ g.s_date }} </td>
+      <td class="work"> {{ g.kol }}    </td>
+      <td class="work"> {{ g.price }}  </td>
+      <td class="work"> {{ g.course }} </td>
+      <td class="work"> {{ g.usd }}    </td>
+      <td class="work"> {{ g.summa }}  </td>
+      <td class="work"> {{ g.kontr }}  </td>
+      <td class="work"> {{ g.text }}   </td>
+    </tr>
+    {% endfor %}
+  </tbody></table>
+  {% endif %}
+
+  <br/>Всего операций: {{ opers.count }}<br/>
+
+{% endblock %}
