@@ -348,7 +348,8 @@ def get(i_year, i_month):
                     text       = '')
 
 def all():
-  return Communal.all().filter('user', users.GetCurrentUser()).order('-year').order('-month')
+  all = Communal.gql('WHERE user = :1 ORDER BY year DESC, month DESC LIMIT 12', users.GetCurrentUser())
+  return all
 
 
 def get_fld(arr, num):

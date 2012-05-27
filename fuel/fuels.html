@@ -3,13 +3,6 @@
 
   <script language="javascript" type="text/javascript">
 
-    function getLink(_p)
-    {
-      var html = '<a href="/fuel?pid=' + _p +'">' + _p + '</a>';
-      document.write(html);
-      return true;
-    }
-
     function myClick(_num)
     {
       var frm = document.getElementById("fld_form");
@@ -28,8 +21,8 @@
   </script>
 
   
-  <div id="gmenu" class="menu"> <a href="/">{{ app_text }}</a> </div> <br/>
-  <div class="PageTitle">   {{ page_title }}   </div>
+  <div id="gmenu" class="menu"> <a href="/">{{ app_text }}</a> | <a href="/fuel/car">{{ car_text }}</a> </div> <br/>
+  <div class="PageTitle">   {{ page_title }}   {% for r in cars %} | <a href="/fuel?car={{ r.pid }}"> {{ r.name }} </a> {% endfor %} </div>
   <div>                     {{ fuel_summary }} </div>
   <div class="PageStatus">  {{ fuel_status }}  </div>
 
@@ -66,7 +59,7 @@
     </tr>
     {% for f in fuels %}
     <tr>
-      <td class="pid">  <script language="javascript" type="text/javascript">getLink({{ f.pid }})</script> </td>
+      <td class="pid">  <a href="/fuel?pid={{ f.pid }}"> {{ f.pid }} </a> </td>
       <td class="work"> {{ f.date.day|escape }}.{{ f.date.month|escape }}.{{ f.date.year|escape }} </td>
       <td class="work"> {{ f.counter }} </td>
       <td class="work"> {{ f.volume }}  </td>
