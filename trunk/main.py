@@ -18,6 +18,7 @@ from ForceLogin                 import ForceLoginPage
 from trip.person.personsPage    import PersonPage
 from trip.tripsPage             import TripPage
 from fuel.fuelsPage             import FuelPage
+from fuel.car.carsPage          import CarPage
 from garage.garagePage          import GaragePage
 from communal.communalPage      import CommunalPage
 from other.otherPage            import OtherPage
@@ -92,6 +93,7 @@ def main():
      ('/garage',          GaragePage),
      ('/garage/import',   GarImpPage),
      ('/fuel',            FuelPage),
+     ('/fuel/car',        CarPage),
      ('/communal',        CommunalPage),
      ('/communal/edit',   CommEditPage),
      ('/communal/import', CommImpPage),

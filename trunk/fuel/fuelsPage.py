@@ -4,8 +4,11 @@ import os
 import datetime
 
 from google.appengine.ext.webapp import template
-from ForceLogin import ForceLoginPage
-from fuel       import fuels
+from ForceLogin                  import ForceLoginPage
+from fuel                        import fuels
+from fuel.car                    import cars
+from fuel.car.cars               import Car
+from google.appengine.api        import users
 
 
 """ ---------------------------------------------------------- """
@@ -31,14 +34,28 @@ class FuelPage(ForceLoginPage):
       except ValueError:
         i_pid = 0
 
+    i_car = 0
+    if self.request.get('car'):
+      try:
+        i_car = int(self.request.get('car'))
+      except ValueError:
+        i_car = 0
+
+    if (i_car != 0):
+      cars.setActive(i_car)
+    
+    carslist = Car.all().filter('user', users.GetCurrentUser()).filter('active', 0).order('name')
+
     template_values = {
       'app_text':     'Приложения',
-      'page_title':   'Заправка',
+      'car_text':     'Авто',
+      'fuels':         fuels.all(),
+      'page_title':  u'Заправка ' + fuels.curcarname(),
       'fuel_summary':  fuels.summary(),
       'fuel_status':   fuels.status,
       'edit_rec':      (i_pid != 0),
       'cur':           fuels.get(i_pid),
-      'fuels':         fuels.all()
+      'cars':          carslist
       }
     return template.render(FuelPage.template_path, template_values)
 

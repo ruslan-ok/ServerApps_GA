@@ -20,6 +20,25 @@ indexes:
   - name: user
   - name: pid
 
+- kind: Car
+  properties:
+  - name: active
+  - name: user
+  - name: name
+
+- kind: Car
+  properties:
+  - name: user
+  - name: active
+    direction: desc
+  - name: name
+
+- kind: Car
+  properties:
+  - name: user
+  - name: pid
+    direction: desc
+
 - kind: Communal
   properties:
   - name: user
@@ -53,6 +72,15 @@ indexes:
   - name: me
     direction: desc
   - name: name
+
+- kind: Fuel
+  properties:
+  - name: car
+  - name: user
+  - name: date
+    direction: desc
+  - name: counter
+    direction: desc
 
 - kind: Fuel
   properties:
@@ -218,6 +246,20 @@ indexes:
   properties:
   - name: user
   - name: year
+    direction: desc
+  - name: days
+    direction: desc
+
+- kind: Trip
+  properties:
+  - name: user
+  - name: year
+    direction: desc
+  - name: week
+    direction: desc
+  - name: date
+    direction: desc
+  - name: oper
     direction: desc
   - name: days
     direction: desc

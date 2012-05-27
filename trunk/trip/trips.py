@@ -236,7 +236,8 @@ def get(i_pid):
                 text      = '')
 
 def all():
-  return Trip.all().filter('user', users.GetCurrentUser()).order('-year').order('-week').order('-oper').order('-days')
+  all = Trip.gql('WHERE user = :1 ORDER BY year DESC, week DESC, date DESC, oper DESC, days DESC LIMIT 30', users.GetCurrentUser())
+  return all
 
 """--------------------------------------------------------------"""
 """                         SALDO                                """
